@@ -24,15 +24,43 @@ def scrape_all():
         "news_title": news_title,
         "news_paragraph": news_paragraph,
         "featured_image": featured_image(browser),
+        "hemispheres": hemispheres(browser),
         "facts": mars_facts(),
         "last_modified": dt.datetime.now()
-    }
+            }
 
     # Stop webdriver and return data
     browser.quit()
     return data
 
+def hemispheres(browser):
+    
+    url = 'https://marshemispheres.com/'
+    browser.visit(url)
 
+    hemisphere_image_urls = []
+    
+    html = browser.html
+    img_soup = soup(html, 'html.parser')
+
+    for hemi in range(4):
+        browser.find_by_css('div[class="description"] a')[hemi].click()
+        html = browser.html
+        img_soup = soup(html, 'html.parser')
+
+        title = img_soup.find('h2', class_='title').get_text()
+        link = img_soup.find('a', text='Sample')
+        img_url = link.get('href')
+
+        hemisphere = {}
+        hemisphere['img_url'] = "https://data-class-mars-hemispheres.s3.amazonaws.com/Mars_Hemispheres/"+img_url
+        hemisphere['title'] = title
+        hemisphere_image_urls.append(hemisphere)
+    
+        browser.back()
+        
+    return hemisphere_image_urls
+    
 def mars_news(browser):
 
     # Scrape Mars News
